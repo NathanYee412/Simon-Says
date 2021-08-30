@@ -8,13 +8,15 @@ let gamePattern = [];
 // game level 
 let level = 0;
 
+// current level
+let currentLevel = 0;
+
+// user clicked pattern
+let userClickedPattern = [];
 
 // get a random sequence and push it to the gamePattern variable 
 function nextSequence() {
-        
-    // user clicked pattern
-    let userClickedPattern = [];
-        
+                
     // random number from 0 - 3
     let randomNumber = (Math.random() * 4);
     randomNumber = Math.floor(randomNumber);
@@ -22,6 +24,10 @@ function nextSequence() {
     // choose color from array buttonColors and push to gamePattern array
     let randomChosenColor = buttonColors[randomNumber];
     gamePattern.push(randomChosenColor);
+    
+    
+    console.log("random chosen color " + randomChosenColor);
+    console.log("game pattern arr " + gamePattern);
 
     // fade button in and out for flash effect 
     $("#" + randomChosenColor).fadeOut(100).fadeIn(100);
@@ -33,9 +39,10 @@ function nextSequence() {
         let clickedColor = event.target.id;
         
         userClickedPattern.push(clickedColor);
-        console.log(userClickedPattern);
+        console.log("user clicked pattern " + userClickedPattern);
         playSound(clickedColor);
         animatePress(clickedColor);
+        checkAnswer(level);
     });
 
     level++;
