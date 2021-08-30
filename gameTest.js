@@ -89,7 +89,7 @@ function checkAnswer(index) {
 
         $("#level-title").text("Gamve over, press any key to restart");
         $(document).on("keydown", () => {
-            startOver;
+            startOver();
         });
     }
 }
