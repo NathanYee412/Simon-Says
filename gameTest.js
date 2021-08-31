@@ -1,101 +1,79 @@
-// button colors on the document
-let buttonColors = ["red", "blue", "green", "yellow"];
 
-// game pattern created with the nextSequence function
-let gamePattern = [];
+var buttonColours = ["red", "blue", "green", "yellow"];
 
+var gamePattern = [];
+var userClickedPattern = [];
 
-// game level 
-let level = 0;
+var started = false;
+var level = 0;
 
-// current level
-let currentLevel = 0;
-
-// user clicked pattern
-let userClickedPattern = [];
-
-// get a random sequence and push it to the gamePattern variable 
-function nextSequence() {
-                
-    // random number from 0 - 3
-    let randomNumber = (Math.random() * 4);
-    randomNumber = Math.floor(randomNumber);
-
-    // choose color from array buttonColors and push to gamePattern array
-    let randomChosenColor = buttonColors[randomNumber];
-    gamePattern.push(randomChosenColor);
-    
-    
-    console.log("random chosen color " + randomChosenColor);
-    console.log("game pattern arr " + gamePattern);
-
-    // fade button in and out for flash effect 
-    $("#" + randomChosenColor).fadeOut(100).fadeIn(100);
-    
-    // play audio of the random chosen color 
-    playSound(randomChosenColor);
-
-    $(document).on("click", (event) => {
-        let clickedColor = event.target.id;
-        
-        userClickedPattern.push(clickedColor);
-        console.log("user clicked pattern " + userClickedPattern);
-        playSound(clickedColor);
-        animatePress(clickedColor);
-        checkAnswer(level);
-    });
-
-    level++;
-}
-
-function playSound(name) {
-    let chosenColorSound = new Audio('/sounds/' + name + '.mp3');
-    chosenColorSound.play();
-}
-
-function animatePress(currentColor) {
-    currentColor = "#" + currentColor;
-    $(currentColor).addClass("pressed");
-    setTimeout(() =>{
-        $(currentColor).removeClass("pressed");
-    }, 100);
-}
-
-// detect when a keyboard key is pressed
-let firstPress = false;
-
-$(document).on("keydown", (event) => {
-    if(firstPress === false) {
+$(document).on("keydown", () => {
+    if(!started) {
+        $("#level-title").text("LeveL " + level);
         nextSequence();
-        firstPress = true;
-        $("#level-title").text("Level " + level);
+        started = true;
     }
 });
 
-function checkAnswer(index) {
-    if(userClickedPattern[index] === gamePattern[index]) {
-        console.log("user has clicked the right pattern");
-        if(userClickedPattern.length === gamePattern.length) {
-            setTimeout(() => {
-                nextSequence();
-            }, 1000);
-        }
-    } else {
-        console.log("user has clicked the wrong pattern");
-        $("body").addClass("game-over");
-        setTimeout(() => {
-            $("body").removeClass("game-over");
-        }, 200);
+$(".btn").on("click", function() {
 
-        $("#level-title").text("Gamve over, press any key to restart");
-        $(document).on("keydown", () => {
-            startOver();
-        });
+  var userChosenColour = $(this).attr("id");
+  userClickedPattern.push(userChosenColour);
+
+  playSound(userChosenColour);
+  animatePress(userChosenColour);
+
+  checkAnswer(userClickedPattern.length-1);
+});
+
+function checkAnswer(currentLevel) {
+
+    if (gamePattern[currentLevel] === userClickedPattern[currentLevel]) {
+      if (userClickedPattern.length === gamePattern.length){
+        setTimeout(function () {
+          nextSequence();
+        }, 1000);
+      }
+    } else {
+      playSound("wrong");
+      $("body").addClass("game-over");
+      $("#level-title").text("Game Over, Press Any Key to Restart");
+
+      setTimeout(function () {
+        $("body").removeClass("game-over");
+      }, 200);
+
+      startOver();
     }
 }
 
-function startOver() { 
-    level = 0;
-    gamePattern = [];
-    firstPress = false;
+
+function nextSequence() {
+  userClickedPattern = [];
+  level++;
+  $("#level-title").text("Level " + level);
+  var randomNumber = Math.floor(Math.random() * 4);
+  var randomChosenColour = buttonColours[randomNumber];
+  gamePattern.push(randomChosenColour);
+
+  $("#" + randomChosenColour).fadeIn(100).fadeOut(100).fadeIn(100);
+  playSound(randomChosenColour);
+}
+
+function animatePress(currentColor) {
+  $("#" + currentColor).addClass("pressed");
+  setTimeout(function () {
+    $("#" + currentColor).removeClass("pressed");
+  }, 100);
+}
+
+function playSound(name) {
+  var audio = new Audio("sounds/" + name + ".mp3");
+  audio.play();
+}
+
+function startOver() {
+  level = 0;
+  gamePattern = [];
+  started = false;
 }

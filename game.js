@@ -2,59 +2,58 @@
 let buttonColors = ["red", "blue", "green", "yellow"];
 
 // game pattern created with the nextSequence function
-let gamePattern = [];
+var gamePattern = [];
 
 // user clicked pattern
-let userClickedPattern = [];
+var userClickedPattern = [];
 
 // game level 
 let level = 0;
 
-// get a random sequence and push it to the gamePattern variable
-// will push only a single color to the array
+// current level
+let currentLevel = 0;
+
+
+
+// get a random sequence and push it to the gamePattern variable 
 function nextSequence() {
+                
+    // random number from 0 - 3
     let randomNumber = (Math.random() * 4);
     randomNumber = Math.floor(randomNumber);
-    
+
+    // choose color from array buttonColors and push to gamePattern array
     let randomChosenColor = buttonColors[randomNumber];
     gamePattern.push(randomChosenColor);
+    
+    
+    console.log(randomChosenColor);
+    console.log(gamePattern);
 
-    level++;
+    // fade button in and out for flash effect 
+    $("#" + randomChosenColor).fadeOut(100).fadeIn(100);
+    
+    // play audio of the random chosen color 
+    playSound(randomChosenColor);
 
     $(document).on("click", (event) => {
+        let clickedColor = event.target.id;
         
+        userClickedPattern.push(clickedColor);
+        console.log(userClickedPattern);
+        playSound(clickedColor);
+        animatePress(clickedColor);
+        checkAnswer(level);
     });
 
-
+    level++;
 }
 
-// click event listeners for colored buttons that will flash
-// and play sounds when clicked
-$("#green").click(() => {
-    $("#green").fadeOut(100).fadeIn(100);
-    let greenSound = new Audio('/sounds/green.mp3');
-    greenSound.play();
-});
+function playSound(name) {
+    let chosenColorSound = new Audio('/sounds/' + name + '.mp3');
+    chosenColorSound.play();
+}
 
-$("#red").click(() => {
-    $("#red").fadeOut(100).fadeIn(100);
-    let redSound = new Audio('/sounds/red.mp3');
-    redSound.play();
-});
-
-$("#blue").click(() => {
-    $("#blue").fadeOut(100).fadeIn(100);
-    let blueSound = new Audio('/sounds/blue.mp3');
-    blueSound.play();
-});
-
-$("#yellow").click(() => {
-    $("#yellow").fadeOut(100).fadeIn(100);
-    let yellowSound = new Audio('/sounds/yellow.mp3');
-    yellowSound.play();
-});
-
-// change background color of button when user clicks button
 function animatePress(currentColor) {
     currentColor = "#" + currentColor;
     $(currentColor).addClass("pressed");
@@ -63,49 +62,43 @@ function animatePress(currentColor) {
     }, 100);
 }
 
-
-// detect when any buttons are clicked to trigger a handler function
-// add the id of the button to the array userClickedPattern
-$(document).click((event) => {
-    let userChosenColor = event.target.id;
-    userClickedPattern.push(userChosenColor);
-
-    animatePress(event.target.id);
-});
-
-// play sound when depending on color passed in as input
-function playSound(color) {
-    switch (color) {
-        case "blue":
-            let blueSound = new Audio('/sounds/blue.mp3');
-            blueSound.play();
-            break;
-        case "yellow":
-            let yellowSound = new Audio('/sounds/yellow.mp3');
-            yellowSound.play();
-            break;
-        case "red":
-            let redSound = new Audio('/sounds/red.mp3');
-            redSound.play();
-            break;
-        case "green":
-            let greenSound = new Audio('/sounds/green.mp3');
-            greenSound.play();
-            break;
-        default:
-            break;
-    }
-}
-
+// detect when a keyboard key is pressed
 let firstPress = false;
 
-// detect when a keyboard key is pressed
 $(document).on("keydown", (event) => {
     if(firstPress === false) {
         nextSequence();
         firstPress = true;
+        $("#level-title").text("Level " + level);
     }
-
-    $("#level-title").text("Level " + level);
-
 });
+
+function checkAnswer(index) {
+    console.log(userClickedPattern[index]);
+    console.log(gamePattern[index]);
+    if(userClickedPattern[index] === gamePattern[index]) {
+        console.log("user has clicked the right pattern");
+        if(userClickedPattern.length === gamePattern.length) {
+            setTimeout(() => {
+                nextSequence();
+            }, 1000);
+        }
+    } else {
+        console.log("user has clicked the wrong pattern");
+        $("body").addClass("game-over");
+        setTimeout(() => {
+            $("body").removeClass("game-over");
+        }, 200);
+
+        $("#level-title").text("Gamve over, press any key to restart");
+        $(document).on("keydown", () => {
+            startOver();
+        });
+    }
+}
+
+function startOver() { 
+    level = 0;
+    gamePattern = [];
+    firstPress = false;
+}
